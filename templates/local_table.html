@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Logs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        };
+    </script>
+</head>
+
+<body class="dark:bg-zinc-900">
+    <section class="container px-4 mx-auto">
+        <!-- This section is for the top of the page with Title and refresh and toggle -->
+        <div class="sm:flex sm:items-center sm:justify-between">
+            <div class="pt-2 px-2">
+                <div class="flex items-center gap-x-3">
+                    <h1 class="text-3xl font-medium text-zinc-900 dark:text-zinc-100">CloudWatch Error Logs</h1>
+                </div>
+            </div>
+            <div class="flex items-center mt-4 gap-x-3">
+                <a href="/refresh"
+                    class="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-zinc-100 transition-colors duration-200 bg-blue-500 dark:bg-zinc-800 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-700 dark:hover:bg-zinc-600">Refresh</a>
+                <button id="toggleDarkMode"
+                    class="flex items-center justify-center w-1/2 px-5 py-2 rounded-lg z-10 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-150">
+                    <!-- Light -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="w-6 h-6 toggle-icon">
+                        <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" class="stroke-zinc-400 dark:stroke-zinc-500">
+                        </path>
+                        <path
+                            d="M12 4v1M17.66 6.344l-.828.828M20.005 12.004h-1M17.66 17.664l-.828-.828M12 20.01V19M6.34 17.664l.835-.836M3.995 12.004h1.01M6 6l.835.836"
+                            class="stroke-zinc-400 dark:stroke-zinc-500">
+                        </path>
+                    </svg>
+                    <!-- Dark -->
+                    <svg viewBox="0 0 24 24" fill="none" class="w-6 h-6 toggle-icon hidden">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M17.715 15.15A6.5 6.5 0 0 1 9 6.035C6.106 6.922 4 9.645 4 12.867c0 3.94 3.153 7.136 7.042 7.136 3.101 0 5.734-2.032 6.673-4.853Z"
+                            class="fill-transparent">
+                        </path>
+                        <path
+                            d="m17.715 15.15.95.316a1 1 0 0 0-1.445-1.185l.495.869ZM9 6.035l.846.534a1 1 0 0 0-1.14-1.49L9 6.035Zm8.221 8.246a5.47 5.47 0 0 1-2.72.718v2a7.47 7.47 0 0 0 3.71-.98l-.99-1.738Zm-2.72.718A5.5 5.5 0 0 1 9 9.5H7a7.5 7.5 0 0 0 7.5 7.5v-2ZM9 9.5c0-1.079.31-2.082.845-2.93L8.153 5.5A7.47 7.47 0 0 0 7 9.5h2Zm-4 3.368C5 10.089 6.815 7.75 9.292 6.99L8.706 5.08C5.397 6.094 3 9.201 3 12.867h2Zm6.042 6.136C7.718 19.003 5 16.268 5 12.867H3c0 4.48 3.588 8.136 8.042 8.136v-2Zm5.725-4.17c-.81 2.433-3.074 4.17-5.725 4.17v2c3.552 0 6.553-2.327 7.622-5.537l-1.897-.632Z"
+                            class="fill-zinc-400 dark:fill-zinc-500">
+                        </path>
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M17 3a1 1 0 0 1 1 1 2 2 0 0 0 2 2 1 1 0 1 1 0 2 2 2 0 0 0-2 2 1 1 0 1 1-2 0 2 2 0 0 0-2-2 1 1 0 1 1 0-2 2 2 0 0 0 2-2 1 1 0 0 1 1-1Z"
+                            class="fill-zinc-400 dark:fill-zinc-500">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- The table section start from here -->
+        <div class="flex flex-col mt-6 ">
+            <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8 ">
+                    <div id="remove_items"
+                        class="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
+                        <form action="/remove_items" method="post">
+                            <table class="min-w-full divide-y-2 divide-gray-200 dark:divide-gray-500">
+                                <thead class="bg-gray-50 dark:bg-zinc-800">
+                                    <tr>
+                                        <th scope="col"
+                                            class="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-zinc-900 dark:text-zinc-100">
+                                            <span>Select</span>
+                                        </th>
+                                        <th scope="col"
+                                            class="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-zinc-900 dark:text-zinc-100">
+                                            Level</th>
+                                        <th scope="col"
+                                            class="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-zinc-900 dark:text-zinc-100">
+                                            Logger</th>
+                                        <!-- <th scope="col" class="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500">
+                        Timestamp
+                      </th> -->
+                                        <th scope="col"
+                                            class="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-zinc-900 dark:text-zinc-100">
+                                            Message
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-zinc-800 divide-y divide-gray-200 dark:divide-gray-700">
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/28/Scrapper_Lulu_Fetch[$LATEST]5f671846a9c0414dae2dd72d9c152280"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/28/Scrapper_Lulu_Fetch[$LATEST]5f671846a9c0414dae2dd72d9c152280&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-28T00:00:28Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal rounded-full text-yellow-800 dark:text-yellow-300 gap-x-2 bg-yellow-50 dark:bg-zinc-600">
+                                                WARNING
+                                            </div>
+                                        </td>
+                                        <td
+                                            class="px-12 py-4 font-medium whitespace-nowrap text-zinc-800 dark:text-zinc-300">
+                                            <div>
+                                                <h2 class="">Scrapper_Lulu_Fetch</h2>
+                                                <p class="text-sm font-normal ">2024-11-28T00:00:28Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-28T00:00:28Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 font-medium whitespace-nowrapbreak-all font-mono break-all text-zinc-800 dark:text-zinc-300">
+                                            <div>"Failed to fetch
+                                                https://www.luluhypermarket.com/en-sa/home-living-furnishing-sofas-furnitures/c/HY01900301
+                                                - Status code: 301"</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/28/Scrapper_Lulu_Fetch[$LATEST]5f671846a9c0414dae2dd72d9c152280"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/28/Scrapper_Lulu_Fetch[$LATEST]5f671846a9c0414dae2dd72d9c152280&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-28T00:00:31Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal rounded-full text-red-800 dark:text-red-400 gap-x-2 bg-red-50 dark:bg-zinc-600">
+                                                WARNING
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <h2 class="font-medium text-gray-800">Scrapper_Lulu_Fetch</h2>
+                                                <p class="text-sm font-normal text-gray-600">2024-11-28T00:00:31Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-28T00:00:31Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono break-all">
+                                            <div>"Failed to fetch
+                                                https://www.luluhypermarket.com/en-kw/electronics-gaming-laptops/c/HY00215222
+                                                - Status code: 301"</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/28/Scrapper_Lulu_Fetch[$LATEST]0f4f7c9d4ab4491c9d400d78a4391087"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/28/Scrapper_Lulu_Fetch[$LATEST]0f4f7c9d4ab4491c9d400d78a4391087&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-28T00:00:48Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal text-gray-500 bg-gray-100 rounded-full gap-x-2">
+                                                ERROR
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <h2 class="font-medium text-gray-800">Scrapper_Lulu_Fetch</h2>
+                                                <p class="text-sm font-normal text-gray-600">2024-11-28T00:00:48Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-28T00:00:48Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono break-all">
+                                            <div>"No URLs provided in the event."</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/28/Scrapper_Lulu_Fetch[$LATEST]f2709dcc925d4da3b2b503d98e693d0e"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/28/Scrapper_Lulu_Fetch[$LATEST]f2709dcc925d4da3b2b503d98e693d0e&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-28T00:00:30Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal text-gray-500 bg-gray-100 rounded-full gap-x-2">
+                                                ERROR
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <h2 class="font-medium text-gray-800">Scrapper_Lulu_Fetch</h2>
+                                                <p class="text-sm font-normal text-gray-600">2024-11-28T00:00:30Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-28T00:00:30Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono break-all">
+                                            <div>"No URLs provided in the event."</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/28/Scrapper_Lulu_Fetch[$LATEST]175ac8ad94fb4d8db54d20ed4097acaf"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/28/Scrapper_Lulu_Fetch[$LATEST]175ac8ad94fb4d8db54d20ed4097acaf&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-28T00:00:16Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal rounded-full text-emerald-500 gap-x-2 bg-emerald-100/60">
+                                                WARNING
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <h2 class="font-medium text-gray-800">Scrapper_Lulu_Fetch</h2>
+                                                <p class="text-sm font-normal text-gray-600">2024-11-28T00:00:16Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-28T00:00:16Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono break-all">
+                                            <div>"Failed to fetch
+                                                https://www.luluhypermarket.com/en-ae/electronics-gaming-laptops/c/HY00215222
+                                                - Status code: 301"</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/28/Scrapper_Lulu_Fetch[$LATEST]175ac8ad94fb4d8db54d20ed4097acaf"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/28/Scrapper_Lulu_Fetch[$LATEST]175ac8ad94fb4d8db54d20ed4097acaf&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-28T00:00:25Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal text-gray-500 bg-gray-100 rounded-full gap-x-2">
+                                                ERROR
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <h2 class="font-medium text-gray-800">Scrapper_Lulu_Fetch</h2>
+                                                <p class="text-sm font-normal text-gray-600">2024-11-28T00:00:25Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-28T00:00:25Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono break-all">
+                                            <div>"No URLs provided in the event."</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/28/Scrapper_Lulu_Fetch[$LATEST]d184d841ab9e46eb98232900e96747b5"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/28/Scrapper_Lulu_Fetch[$LATEST]d184d841ab9e46eb98232900e96747b5&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-28T00:00:17Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal text-gray-500 bg-gray-100 rounded-full gap-x-2">
+                                                ERROR
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <h2 class="font-medium text-gray-800">Scrapper_Lulu_Fetch</h2>
+                                                <p class="text-sm font-normal text-gray-600">2024-11-28T00:00:17Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-28T00:00:17Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono break-all">
+                                            <div>"No URLs provided in the event."</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/28/Scrapper_Lulu_Fetch[$LATEST]ca1fef2fdda24b26940d44a455e78949"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/28/Scrapper_Lulu_Fetch[$LATEST]ca1fef2fdda24b26940d44a455e78949&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-28T00:00:20Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal text-gray-500 bg-gray-100 rounded-full gap-x-2">
+                                                ERROR
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <h2 class="font-medium text-gray-800">Scrapper_Lulu_Fetch</h2>
+                                                <p class="text-sm font-normal text-gray-600">2024-11-28T00:00:20Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-28T00:00:20Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono break-all">
+                                            <div>"No URLs provided in the event."</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/28/Scrapper_Lulu_Fetch[$LATEST]ca1fef2fdda24b26940d44a455e78949"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/28/Scrapper_Lulu_Fetch[$LATEST]ca1fef2fdda24b26940d44a455e78949&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-28T00:00:21Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal rounded-full text-emerald-500 gap-x-2 bg-emerald-100/60">
+                                                WARNING
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <h2 class="font-medium text-gray-800">Scrapper_Lulu_Fetch</h2>
+                                                <p class="text-sm font-normal text-gray-600">2024-11-28T00:00:21Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-28T00:00:21Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono break-all">
+                                            <div>"Failed to fetch
+                                                https://www.luluhypermarket.com/en-sa/electronics-gaming-laptops/c/HY00215222
+                                                - Status code: 301"</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/25/Scrapper_SACO_KSA[$LATEST]6d3f2c935b75459fb556055f4216c256"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/25/Scrapper_SACO_KSA[$LATEST]6d3f2c935b75459fb556055f4216c256&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-25T00:00:14Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal text-gray-500 bg-gray-100 rounded-full gap-x-2">
+                                                ERROR
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <h2 class="font-medium text-gray-800">root</h2>
+                                                <p class="text-sm font-normal text-gray-600">2024-11-25T00:00:14Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-25T00:00:14Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono break-all">
+                                            <div>"Error fetching data: Client error \u0027400 \u0027 for url
+                                                \u0027https://api.cj8mhwb-saudicomp2-p2-public.model-t.cc.commerce.ondemand.com/occ/v2/sacoStore/unbxd/search?fields=FULL\u0026query=%3Arelevance%3AallCategories%3AMC00201\u0026currentPage=1\u0026pageSize=18\u0026lang=en\u0026curr=SAR\u0027\nFor
+                                                more information check:
+                                                https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/25/Scrapper_SACO_KSA[$LATEST]6d3f2c935b75459fb556055f4216c256"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/25/Scrapper_SACO_KSA[$LATEST]6d3f2c935b75459fb556055f4216c256&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-25T00:00:25Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal text-gray-500 bg-gray-100 rounded-full gap-x-2">
+                                                ERROR
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <h2 class="font-medium text-gray-800">root</h2>
+                                                <p class="text-sm font-normal text-gray-600">2024-11-25T00:00:25Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-25T00:00:25Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono break-all">
+                                            <div>"Error fetching data: Client error \u0027400 \u0027 for url
+                                                \u0027https://api.cj8mhwb-saudicomp2-p2-public.model-t.cc.commerce.ondemand.com/occ/v2/sacoStore/unbxd/search?fields=FULL\u0026query=%3Arelevance%3AallCategories%3AMC00201\u0026currentPage=31\u0026pageSize=18\u0026lang=en\u0026curr=SAR\u0027\nFor
+                                                more information check:
+                                                https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <input type="checkbox" name="check"
+                                                    id="2024/11/26/Scrapper_Lulu_Fetch[$LATEST]af10857ed33d4ea39cb22e28ab7b8c30"
+                                                    value='{"log_id": "{&#39;S&#39;: &#39;2024/11/26/Scrapper_Lulu_Fetch[$LATEST]af10857ed33d4ea39cb22e28ab7b8c30&#39;}", "timestamp": "{&#39;S&#39;: &#39;2024-11-26T00:00:31Z&#39;}"}'
+                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div
+                                                class="inline px-3 py-1 text-sm font-normal rounded-full text-emerald-500 gap-x-2 bg-emerald-100/60">
+                                                WARNING
+                                            </div>
+                                        </td>
+                                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div>
+                                                <h2 class="font-medium text-gray-800">Scrapper_Lulu_Fetch</h2>
+                                                <p class="text-sm font-normal text-gray-600">2024-11-26T00:00:31Z</p>
+                                            </div>
+                                        </td>
+                                        <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>2024-11-26T00:00:31Z</div>
+                          </td> -->
+                                        <td
+                                            class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono break-all">
+                                            <div>"Failed to fetch
+                                                https://www.luluhypermarket.com/en-bh/home-living-furnishing-bed-room/c/HY01900302
+                                                - Status code: 301"</div>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            <div class=" sm:flex sm:items-center sm:justify-between">
+                                <div class="p-4 text-sm text-gray-500 dark:text-gray-400">
+                                    Page
+                                    <span class="font-medium text-gray-700">1 of 10</span>
+                                </div>
+                                <div class="flex p-4 items-center  gap-x-4 sm:mt-0">
+                                    <input type="submit" value="Mark as Done" id="remove_btn"
+                                        class="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-zinc-100 transition-colors duration-200 bg-blue-500 dark:bg-zinc-800 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-700 dark:hover:bg-zinc-600" />
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('toggleDarkMode').addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark'); // Use <html> tag for dark mode toggle.
+
+                let toggleIcons = document.querySelectorAll('.toggle-icon');
+                toggleIcons.forEach(toggleIcon => {
+                    toggleIcon.classList.toggle('hidden');
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
