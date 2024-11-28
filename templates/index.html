@@ -1,52 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="dark">
   <head>
-    <title>Grocery List</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/main.css')}}"
-    />
-    <script
-      type="text/javascript"
-      src="{{ url_for('static', filename='js/main.js')}}"
-    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Logs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Dark mode toggle logic
+      document.addEventListener('DOMContentLoaded', () => {
+        const toggle = document.getElementById('darkModeToggle');
+        toggle.addEventListener('click', () => {
+          document.documentElement.classList.toggle('dark');
+        });
+      });
+    </script>
   </head>
-  <body>
-    <!-- LOGO -->
-    <div>
-      <img
-        src="https://raw.githubusercontent.com/MariyaSha/groceriesList/main/logo_black.png"
-        alt="grocery app logo"
-      />
-    </div>
-
-    <!-- REMOVE ITEMS FORM -->
-    <div id="remove_items">
-      <form action="/remove_items" method="POST">
-        {% for item in shopping_items%}
-        <input
-          type="checkbox"
-          name="check"
-          id="{{item}}"
-          value="{{item}}"
-          onchange="check_me('{{ item }}')"
-        />
-        <label for="{{items}}" name="{{item}}">{{ item }}</label><br />
-        {% endfor %}
-        <input type="submit" value="CHECK ITEMS" id="remove_btn" />
-      </form>
-    </div>
-
-    <!-- ADD ITEMS FORM -->
-    <div id="add_item">
-      <form action="/add_items" method="POST">
-        <select name="select_items">
-          {% for item in all_items %}
-          <option value="{{ item }}">{{ item }}</option>
-          {% endfor %}
-        </select>
-        <input type="submit" value="ADD ITEM" id="add_btn" />
-      </form>
-    </div>
-  </body>
-</html>
+  <body class="">
+    <div class="container px-4 mx-auto">
+      <div class="sm:flex sm:items-center sm:justify-between">
+        <div>
+          <div class="flex items-center gap-x-3">
+            <h1 class="text-lg font-medium text-gray-800">CloudWatch Error Logs</h1>
+          </div>
+        </div>
+        <div class="flex items-center mt-4 gap-x-3">
+          <button id="darkModeToggle"
+                  class="flex items-center justify-center w-1/2 px-5 py-2 text-sm text-gray-700 transition-colors duration-200 bg-white border rounded-lg gap-x-2 sm:w-auto hover:bg-gray-100">
+            Toggle Dark Mode
+          </button>
+          <a href="/refresh"
+             class="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-blue-500 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-600">Refresh</a>
+        </div>
+      </div>
+      <div class="flex flex-col mt-6">
+        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+            <div id="remove_items"
+                 class="overflow-hidden border border-gray-200 md:rounded-lg">
+              <form action="/remove_items" method="post">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th scope="col"
+                          class="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500">
+                        <span>Select</span>
+                      </th>
+                      <th scope="col"
+                          class="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500">Level</th>
+                      <th scope="col"
+                          class="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500">Logger</th>
+                      <!-- <th scope="col" class="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500">
+                        Timestamp
+                      </th> -->
+                      <th scope="col"
+                          class="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500">Message</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    {% for item in all_items %}
+                      <tr>
+                        <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                          <div>
+                            <input type="checkbox"
+                                   name="check"
+                                   id="{{ item.log_id.S }}"
+                                   value='{"log_id": "{{ item.log_id }}", "timestamp": "{{ item.timestamp }}"}'
+                                   class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                          </div>
+                        </td>
+                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                          <div {% if item.level.S == 'ERROR' %} class="inline px-3 py-1 text-sm font-normal text-gray-500 bg-gray-100 rounded-full gap-x-2" {% else %} class="inline px-3 py-1 text-sm font-normal rounded-full text-emerald-500 gap-x-2 bg-emerald-100/60" {% endif %}>
+                            {{ item.level.S }}
+                          </div>
+                        </td>
+                        <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                          <div>
+                            <h2 class="font-medium text-gray-800">{{ item.logger.S }}</h2>
+                            <p class="text-sm font-normal text-gray-600">
+                              {{ item.timestamp.S }}
+                            </div>
+                          </td>
+                          <!-- <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
+                            <div>{{ item.timestamp.S }}</div>
+                          </td> -->
+                          <td class="px-12 py-4 text-sm font-medium whitespace-nowrapbreak-all font-mono ">
+                            <div>{{ item.message.S|tojson(indent=4) }}</div>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                  <div class="mt-6 sm:flex sm:items-center sm:justify-between">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                      Page
+                      <span class="font-medium text-gray-700">1 of 10</span>
+                    </div>
+                    <div class="flex items-center mt-4 gap-x-4 sm:mt-0">
+                      <input type="submit"
+                             value="Mark as Done"
+                             id="remove_btn"
+                             class="flex items-center justify-center w-1/2 px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md sm:w-auto gap-x-2 hover:bg-gray-100" />
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
